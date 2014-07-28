@@ -3,36 +3,27 @@
 use strict;
 use warnings;
 
-use PDF::API2;
+use File::Copy;
 
-my ($pdffile,$isbnfile) = @_;
+my ($pdfprefix,$isbnfile) = @_;
+#Adobe Acrobatでファイルを分割すると、xxxxx_PartX.pdfというファイルができるので、
+#"xxxx_Part"の部分までを入力する
 
-
-my $source = PDF::API2->open($pdffile);
-
-open my $fh, '<', $isbnfile or die "Cannot open $isbnfile :$!";
+open my $fh,'<',$isbnfile or die "Cannot open $isbnfile:$!";
 
 my @lines = <$fh>;
 
-my $pagecount = $source->pages();
-my $bookcount = $pagecount / 3;
+print my $a = @lines;
+print "\n";
 
-my $bookcount2 = @lines;
-if($bookcount2 != $bookcount2){ die "Invalid file!\n"};
+close $fh or die "close $isbnfile failed:$!";
 
-
-
-for(1..$bookcount){
-		my $pdf = PDF::API2->new();
-		$pdf->import_page($source,$_ * 3 -2 , 1);
-		$pdf->import_page($source,$_ * 3 -1 , 2);
-		$pdf->import_page($source,$_ * 3    , 3);
-		$pdf->preferences(
-				-twocolumnright => 1,
-				);
-		
-		$pdf->saveas("$lines[$_].pdf");
+my $i = 1;
+foreach my $line(@lines){
+#		chomp ($line); #cygwin環境だとchompがうまく動かない
+		$line =~ s/\x0D?\x0A$//g;
+		my $oldFileName = "$pdfprefix$i.pdf";
+		my $newFileName = "$line.pdf";
+		File::Copy::move($oldFileName, $newFileName) or die "Cannot move $oldFileName to $newFileName";
 }
-
-
 
