@@ -5,7 +5,7 @@ use warnings;
 
 use File::Copy;
 
-my ($pdfprefix,$isbnfile) = @_;
+my ($pdfprefix,$isbnfile) = @ARGV;
 #Adobe Acrobatでファイルを分割すると、xxxxx_PartX.pdfというファイルができるので、
 #"xxxx_Part"の部分までを入力する
 
@@ -24,6 +24,9 @@ foreach my $line(@lines){
 		$line =~ s/\x0D?\x0A$//g;
 		my $oldFileName = "$pdfprefix$i.pdf";
 		my $newFileName = "$line.pdf";
+
 		File::Copy::move($oldFileName, $newFileName) or die "Cannot move $oldFileName to $newFileName";
+		print "Renamed $oldFileName -> $newFileName\n";
+		$i++;
 }
 
